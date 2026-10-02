@@ -1,0 +1,12 @@
+# Build output
+bin/
+
+# Frames produced by -capture. Only the two sets the README cites are tracked;
+# everything else here is per-sweep scratch (A/B variants, shade buffers,
+# contact sheets) that a later run overwrites.
+captures/t_*/
+captures/shade*/
+captures/timeline/
+captures/look_*.png
+captures/gorubik_*.png
+captures/sheet_*.png
