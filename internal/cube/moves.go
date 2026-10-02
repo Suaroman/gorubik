@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // ---------------------------------------------------------------------------

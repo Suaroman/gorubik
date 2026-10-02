@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // Dir identifies one of the six axis directions. It doubles as the identity of

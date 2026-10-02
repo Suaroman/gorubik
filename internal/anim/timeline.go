@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // Phase is the stage of the presentation.

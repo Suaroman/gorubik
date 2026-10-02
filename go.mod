@@ -1,4 +1,4 @@
-module github.com/suaro/gorubik
+module github.com/Suaroman/gorubik
 
 go 1.27.1
 

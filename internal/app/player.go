@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/suaro/gorubik/internal/anim"
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/render"
+	"github.com/Suaroman/gorubik/internal/anim"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/render"
 )
 
 // player adapts the animation timeline to what the renderer wants: a render.View

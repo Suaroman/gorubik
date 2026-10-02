@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 
-	"github.com/suaro/gorubik/internal/render"
+	"github.com/Suaroman/gorubik/internal/render"
 )
 
 // Options is everything the caller can say about the window and the run.

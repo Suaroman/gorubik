@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 
-	"github.com/suaro/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/gfx"
 )
 
 // The debug overlay is drawn from a hand-built 5x7 bitmap font rather than a text

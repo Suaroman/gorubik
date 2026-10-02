@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 
-	"github.com/suaro/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/gfx"
 )
 
 // The studio environment is generated once at start-up from the analytic function

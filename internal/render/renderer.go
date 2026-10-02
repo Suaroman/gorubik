@@ -14,10 +14,10 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/geo"
-	"github.com/suaro/gorubik/internal/gfx"
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/geo"
+	"github.com/Suaroman/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // InitGL binds the GL entry points and reports the driver. It must run with a current

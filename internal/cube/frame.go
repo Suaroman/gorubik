@@ -1,6 +1,6 @@
 package cube
 
-import "github.com/suaro/gorubik/internal/math3d"
+import "github.com/Suaroman/gorubik/internal/math3d"
 
 // LayerTurn is an in-flight, not yet committed face turn.
 type LayerTurn struct {

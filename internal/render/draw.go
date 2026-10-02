@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/gfx"
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // View is one frame's worth of "what should be on screen". It carries the logical

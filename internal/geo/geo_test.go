@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // These tests are the reason the procedural meshes can be trusted before a single

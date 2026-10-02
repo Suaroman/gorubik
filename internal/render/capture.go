@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 
-	"github.com/suaro/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/gfx"
 )
 
 // The capture path renders the scene into an offscreen RGBA8 target and writes a

@@ -572,9 +572,9 @@ go test ./...
 ```
 
 ```
-ok      github.com/suaro/gorubik/internal/cube
-ok      github.com/suaro/gorubik/internal/geo
-ok      github.com/suaro/gorubik/internal/math3d
+ok      github.com/Suaroman/gorubik/internal/cube
+ok      github.com/Suaroman/gorubik/internal/geo
+ok      github.com/Suaroman/gorubik/internal/math3d
 ```
 
 The cube suite covers: `TestNotationMatchesPhysicalCube`, which pins the

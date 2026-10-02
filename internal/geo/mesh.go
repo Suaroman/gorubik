@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // Vertex is one mesh vertex: a position and its analytic unit normal.

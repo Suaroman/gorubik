@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/suaro/gorubik/internal/gfx"
+	"github.com/Suaroman/gorubik/internal/gfx"
 )
 
 // Shaders are compiled into the binary, so the executable runs from anywhere and a

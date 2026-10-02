@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 func TestNewCubeIsSolved(t *testing.T) {

@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/suaro/gorubik/internal/app"
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/render"
+	"github.com/Suaroman/gorubik/internal/app"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/render"
 )
 
 func main() {

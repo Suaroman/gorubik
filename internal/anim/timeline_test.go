@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/suaro/gorubik/internal/cube"
-	"github.com/suaro/gorubik/internal/math3d"
+	"github.com/Suaroman/gorubik/internal/cube"
+	"github.com/Suaroman/gorubik/internal/math3d"
 )
 
 // cycleLen returns the length of one scramble/pause/solve/hold cycle, computed
