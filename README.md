@@ -144,7 +144,7 @@ systems because the directory is visible from each side.
 
 ```bash
 ./build.sh windows
-cmd.exe /c '\\wsl.localhost\Ubuntu\home\suaro\projects\qwen38-go-rubik\bin\gorubik.exe'
+cmd.exe /c '\\wsl.localhost\<Distro>\home\<you>\projects\qwen38-go-rubik\bin\gorubik.exe'
 ```
 
 `build.sh` prints the exact `cmd.exe` line for wherever it was built, so you do
@@ -231,7 +231,7 @@ renderer: NVIDIA RTX A5000 Laptop GPU/PCIe/SSE2
 To pin the discrete adapter for this one binary:
 
 ```
-reg add "HKCU\Software\Microsoft\DirectX\UserGpuPreferences" /v "\\wsl.localhost\Ubuntu\home\suaro\projects\qwen38-go-rubik\bin\gorubik.exe" /t REG_SZ /d "gpuPreference=2" /f
+reg add "HKCU\Software\Microsoft\DirectX\UserGpuPreferences" /v "\\wsl.localhost\<Distro>\home\<you>\projects\qwen38-go-rubik\bin\gorubik.exe" /t REG_SZ /d "gpuPreference=2" /f
 ```
 
 The value name must be the exact path you launch. Measured on the development

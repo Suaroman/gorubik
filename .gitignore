@@ -10,3 +10,6 @@ captures/timeline/
 captures/look_*.png
 captures/gorubik_*.png
 captures/sheet_*.png
+
+# Feedback photos dropped in for debugging; keep out of the repo.
+feedback-images/
