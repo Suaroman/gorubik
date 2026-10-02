@@ -27,6 +27,12 @@ void main() {
 
     // A gentle S that is exactly the identity at black and at white, so the
     // specified backdrop values survive untouched while mid-tones keep some punch.
+    // Clamped first on purpose: the extended Reinhard curve passes above 1 for
+    // radiance well over the white point, and the S term evaluated outside 0..1
+    // turns negative hard - at c=3.8 with the default strength it flips the pixel
+    // black - which drew a burnt-rimmed black ellipse at the core of the brightest
+    // sticker glare. Pixels the clamp touches were destined for white anyway.
+    c = clamp(c, 0.0, 1.0);
     c = c + uContrast * c * (1.0 - c) * (c - 0.5);
 
     vec2 q = vUV - 0.5;
