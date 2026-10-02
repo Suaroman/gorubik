@@ -16,7 +16,7 @@ const (
 	PhaseScramble
 	PhasePaused // holding the scrambled state
 	PhaseSolving
-	PhaseOutro // solved again, rotating forever
+	PhaseOutro // solved again, rotating, until the next cycle begins
 )
 
 func (p Phase) String() string {
@@ -45,12 +45,12 @@ type SpinConfig struct {
 	RollPhase         float32
 }
 
-// DefaultSpin is roughly 6 degrees per second of yaw with a gentle sway.
+// DefaultSpin is roughly 12 degrees per second of yaw with a gentle sway.
 func DefaultSpin() SpinConfig {
 	return SpinConfig{
-		Yaw0: -0.42, YawRate: 0.105,
-		Pitch0: 0.27, PitchAmp: 0.085, PitchRate: 0.062,
-		RollAmp: 0.030, RollRate: 0.047, RollPhase: 1.1,
+		Yaw0: -0.42, YawRate: 0.21,
+		Pitch0: 0.27, PitchAmp: 0.085, PitchRate: 0.124,
+		RollAmp: 0.030, RollRate: 0.094, RollPhase: 1.1,
 	}
 }
 
@@ -69,17 +69,20 @@ type Config struct {
 	Turn   float64 // seconds per face turn
 	Gap    float64 // beat between consecutive turns
 	Pause  float64 // seconds holding the scrambled cube
+	Hold   float64 // seconds holding the solved cube before the next cycle
 	Settle float64 // turn overshoot, as a fraction of the turn
 	Spin   SpinConfig
 }
 
-// DefaultConfig matches the brief: 2 s intro, ~0.5 s per turn, 2 s pause.
+// DefaultConfig matches the brief: 2 s intro, ~0.5 s per turn, 2 s pause, and a
+// 10 s solved hold before each repeat of the scramble/solve cycle.
 func DefaultConfig() Config {
 	return Config{
 		Intro:  2.0,
 		Turn:   0.50,
 		Gap:    0.06,
 		Pause:  2.0,
+		Hold:   10.0,
 		Settle: 0.006, // 0.006 * 90 degrees = about half a degree
 		Spin:   DefaultSpin(),
 	}
@@ -95,25 +98,35 @@ type segment struct {
 // Player owns the cube and walks it through the timeline. Everything is derived
 // from a single elapsed-time value, so Restart plus a fixed number of steps
 // reproduces any moment exactly.
+//
+// The presentation loops: one cycle is scramble, hold-the-scramble, solve, then a
+// solved pause of cfg.Hold seconds, after which the same cycle starts again on a
+// freshly solved cube and continues forever. The segment schedule is stored once,
+// relative to unitOrigin (the moment the current cycle's scramble begins), and the
+// whole spin depends on spinT, which never wraps — so the cube's global rotation
+// carries across cycle boundaries without a snap.
 type Player struct {
 	cfg  Config
 	cube *cube.Cube
 	seq  [2][]cube.Move
 
-	segs      []segment
-	t         float64
-	committed int
-	phase     Phase
-	solveDone bool
+	segs       []segment // times relative to unitOrigin
+	t          float64   // absolute elapsed time
+	unitOrigin float64   // t at which the current cycle's scramble starts
+	spinT      float64   // monotonic clock for the whole-cube spin; never wraps
+	committed  int
+	cycles     int // completed cycles
+	phase      Phase
+	solveDone  bool
 
-	// Timeline boundaries, in seconds.
-	scrambleEnd, pauseEnd, solveEnd float64
+	// Cycle boundaries, in seconds, relative to unitOrigin.
+	scrambleEnd, pauseEnd, solveEnd, cycleEnd float64
 }
 
 // New builds a player for the given sequences.
 func New(scramble, solve []cube.Move, cfg Config) *Player {
 	p := &Player{cfg: cfg, cube: cube.New(), seq: [2][]cube.Move{scramble, solve}}
-	t := cfg.Intro
+	t := 0.0
 	for s := 0; s < 2; s++ {
 		for i, mv := range p.seq[s] {
 			seg := segment{start: t, end: t + cfg.Turn, mv: mv, seq: s, idx: i}
@@ -130,6 +143,8 @@ func New(scramble, solve []cube.Move, cfg Config) *Player {
 		}
 	}
 	p.solveEnd = t
+	p.cycleEnd = t + cfg.Hold
+	p.unitOrigin = cfg.Intro // the first cycle keeps the solved-cube intro
 	p.phase = PhaseIntro
 	return p
 }
@@ -138,35 +153,55 @@ func New(scramble, solve []cube.Move, cfg Config) *Player {
 func (p *Player) Restart() {
 	p.cube = cube.New()
 	p.t = 0
+	p.spinT = 0
+	p.unitOrigin = p.cfg.Intro
 	p.committed = 0
+	p.cycles = 0
 	p.phase = PhaseIntro
 	p.solveDone = false
 }
 
 // Update advances the timeline by dt seconds, committing every turn whose window
 // has been passed. Committing from the schedule rather than from "the frame where
-// progress reached 1" is what keeps the state correct when a frame is long.
+// progress reached 1" is what keeps the state correct when a frame is long. When
+// the solved hold runs out the cycle repeats: the schedule shifts forward by one
+// cycle length and the cube starts again from a guaranteed-solved state, while the
+// spin clock (and therefore the global orientation) keeps running.
 func (p *Player) Update(dt float64) {
 	p.t += dt
-	for p.committed < len(p.segs) && p.segs[p.committed].end <= p.t {
-		p.cube.Apply(p.segs[p.committed].mv)
-		p.committed++
-		if p.committed == len(p.segs) {
-			p.solveDone = true
+	p.spinT += dt
+	for {
+		lt := p.t - p.unitOrigin
+		for p.committed < len(p.segs) && p.segs[p.committed].end <= lt {
+			p.cube.Apply(p.segs[p.committed].mv)
+			p.committed++
+			if p.committed == len(p.segs) {
+				p.solveDone = true
+			}
 		}
+		if lt < p.cycleEnd {
+			break
+		}
+		p.unitOrigin += p.cycleEnd
+		p.cube = cube.New()
+		p.committed = 0
+		p.solveDone = false
+		p.cycles++
 	}
-	p.phase = p.phaseAt(p.t)
+	p.phase = p.phaseAt(p.t - p.unitOrigin)
 }
 
-func (p *Player) phaseAt(t float64) Phase {
+// phaseAt takes the time within the current cycle; it is negative only during the
+// first cycle's intro.
+func (p *Player) phaseAt(lt float64) Phase {
 	switch {
-	case t < p.cfg.Intro:
+	case lt < 0:
 		return PhaseIntro
-	case t < p.scrambleEnd:
+	case lt < p.scrambleEnd:
 		return PhaseScramble
-	case t < p.pauseEnd:
+	case lt < p.pauseEnd:
 		return PhasePaused
-	case t < p.solveEnd:
+	case lt < p.solveEnd:
 		return PhaseSolving
 	default:
 		return PhaseOutro
@@ -175,12 +210,13 @@ func (p *Player) phaseAt(t float64) Phase {
 
 // Turn is the in-flight face turn, or nil when nothing is rotating.
 func (p *Player) Turn() *cube.LayerTurn {
+	lt := p.t - p.unitOrigin
 	for i := range p.segs {
 		s := &p.segs[i]
-		if p.t < s.start || p.t >= s.end {
+		if lt < s.start || lt >= s.end {
 			continue
 		}
-		progress := (p.t - s.start) / (s.end - s.start)
+		progress := (lt - s.start) / (s.end - s.start)
 		return &cube.LayerTurn{
 			Move:  s.mv,
 			Angle: float32(TurnAngle(progress, float64(s.mv.Angle()), p.cfg.Settle)),
@@ -194,9 +230,10 @@ func (p *Player) Phase() Phase { return p.phase }
 
 // MoveName is the move turning right now, or "-" between turns.
 func (p *Player) MoveName() string {
+	lt := p.t - p.unitOrigin
 	for i := range p.segs {
 		s := &p.segs[i]
-		if p.t >= s.start && p.t < s.end {
+		if lt >= s.start && lt < s.end {
 			return fmt.Sprintf("%s (%s %d/%d)", s.mv, seqName(s.seq), s.idx+1, len(p.seq[s.seq]))
 		}
 	}
@@ -219,10 +256,18 @@ func (p *Player) Time() float64 { return p.t }
 // SolveCompleted reports whether the inverse sequence has finished.
 func (p *Player) SolveCompleted() bool { return p.solveDone }
 
-// Spin is the whole-cube orientation for the current time.
-func (p *Player) Spin() math3d.Mat4 { return p.cfg.Spin.Matrix(float32(p.t)) }
+// Spin is the whole-cube orientation for the current time. It reads spinT rather
+// than the cycle-local clock precisely so the rotation survives the wrap at a
+// cycle boundary.
+func (p *Player) Spin() math3d.Mat4 { return p.cfg.Spin.Matrix(float32(p.spinT)) }
 
-// Timeline returns the phase boundaries, for the debug overlay and the README.
+// Cycles is the number of scramble/solve cycles completed so far.
+func (p *Player) Cycles() int { return p.cycles }
+
+// Timeline returns the first cycle's phase boundaries on the absolute clock, for
+// the debug overlay and the README; every later cycle is the same shape shifted by
+// a whole number of cycle lengths.
 func (p *Player) Timeline() (intro, scrambleEnd, pauseEnd, solveEnd float64) {
-	return p.cfg.Intro, p.scrambleEnd, p.pauseEnd, p.solveEnd
+	i := p.cfg.Intro
+	return i, i + p.scrambleEnd, i + p.pauseEnd, i + p.solveEnd
 }
